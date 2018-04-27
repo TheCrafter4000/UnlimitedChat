@@ -8,17 +8,23 @@ import thecrafter4000.unlimitedchat.ClientProxy;
 import thecrafter4000.unlimitedchat.UnlimitedChat;
 import thecrafter4000.unlimitedchat.network.PacketC01ChatMessage;
 
+/**
+ * An extended version of the vanilla chat GUI.
+ * @author TheCrafter4000
+ */
 @SideOnly(Side.CLIENT)
 public class GuiUnlimitedChat extends GuiChat {
 
 	public GuiUnlimitedChat(String text) {
-		super(text);
+		super(text); // Makes sure that the "/" hotkey is working.
+		
+		//TODO: Add a way to save previous typed texts and paste them.
 	}
 	
 	@Override
 	public void initGui() {
 		super.initGui();
-		this.inputField.setMaxStringLength(ClientProxy.ChatLimit);
+		this.inputField.setMaxStringLength(ClientProxy.ChatLimit); // Updates char limit.
 	}
 
 	@Override
@@ -27,11 +33,6 @@ public class GuiUnlimitedChat extends GuiChat {
         if (ClientCommandHandler.instance.executeCommand(mc.thePlayer, msg) != 0) return; // Executes client-side commands
         UnlimitedChat.PacketHandler.sendToServer(new PacketC01ChatMessage(msg)); // Sends the text to the server.
         
-        // Old code. Had been used in version stable-client-0.1.0
-        
-//        Matcher m = Pattern.compile("\\G\\s*(.{1,100})(?=\\s|$)", Pattern.DOTALL).matcher(msg); // Custom splitter
-//        while (m.find()) {
-//        	this.mc.thePlayer.sendChatMessage(m.group(1));
-//        }
+        //TODO: Add a way for admins to see what client commands people execute.
 	}
 }

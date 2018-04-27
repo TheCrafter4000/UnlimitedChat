@@ -15,22 +15,20 @@ buildscript {
     }
 }
 
-repositories {
-    maven {
-        name = "sk89q"
-        url = "http://maven.sk89q.com/repo/"
-    }
-    maven {
-        name = "sponge"
-        url = "http://repo.spongepowered.org/maven/"
-    }
-}
-
 apply plugin: 'forge'
 
-version = "1.0.3"
-group= "thecrafter4000.unlimitedchat" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "unlimitedchat"
+version = "unknown"
+group= "thecrafter4000.unlimitedchat"
+archivesBaseName = "UnlimitedChat"
+
+File file = file("src/main/java/" + project.group.replace(".", "/") + "/" + project.archivesBaseName + ".java") // Finds main modfile
+file.readLines().each{ // Iterates over the whole file
+	if (it.contains("public static final String VERSION = ")) { // looks for the VERSION field
+			project.version = it.substring(39, it.length()-2) // Overwrites the version string
+		}
+}
+
+println "Successfully read mod version: " + project.version + "!"
 
 minecraft {
     version = "1.7.10-10.13.4.1614-1.7.10"
@@ -38,8 +36,7 @@ minecraft {
 }
 
 dependencies {
-
-    compile 'com.forgeessentials:forgeessentials:1.4.6:dev'
+    // you may put jars on which you depend on in ./libs
 }
 
 processResources

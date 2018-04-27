@@ -7,13 +7,17 @@ import io.netty.buffer.ByteBuf;
 import thecrafter4000.unlimitedchat.ClientProxy;
 import thecrafter4000.unlimitedchat.UnlimitedChat;
 
-public class PacketC02ChatLimit implements IMessage {
+/**
+ * A packet sent form client to server containing the client's character limitation.
+ * @author TheCrafter4000
+ */
+public class PacketS03ChatLimit implements IMessage {
 
 	private int limit;
 	
-	public PacketC02ChatLimit() {}
+	public PacketS03ChatLimit() {}
 	
-	public PacketC02ChatLimit(int limit) {
+	public PacketS03ChatLimit(int limit) {
 		this.limit = limit;
 	}
 
@@ -27,10 +31,14 @@ public class PacketC02ChatLimit implements IMessage {
 		limit = buf.readInt();
 	}
 	
-	public static class HandlerC02ChatLimit implements IMessageHandler<PacketC02ChatLimit, IMessage>{
+	/**
+	 * Client - sided handler for {@link PacketS03ChatLimit}.
+	 * @author TheCrafter4000
+	 */
+	public static class HandlerC03ChatLimit implements IMessageHandler<PacketS03ChatLimit, IMessage>{
 
 		@Override
-		public IMessage onMessage(PacketC02ChatLimit message, MessageContext ctx) {
+		public IMessage onMessage(PacketS03ChatLimit message, MessageContext ctx) {
 			ClientProxy.ChatLimit = message.limit;
 			UnlimitedChat.Logger.info("Recieved chatlimit: " + message.limit + "!");
 			return null;

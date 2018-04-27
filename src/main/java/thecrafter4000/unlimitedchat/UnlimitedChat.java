@@ -13,20 +13,24 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
+/**
+ * UnlimitedChat, a mod by TheCrafter4000, removes the annoying char limitation vanilla chat has.
+ * @author TheCrafter4000
+ */
 @Mod(modid = UnlimitedChat.MODID, version = UnlimitedChat.VERSION, name = UnlimitedChat.NAME, acceptedMinecraftVersions = "1.7.10" )
 public class UnlimitedChat {
 	public static final String MODID = "unlimitedchat";
-	public static final String VERSION = "1.0.3";
+	public static final String VERSION = "1.0.4";
 	public static final String NAME = "UnlimitedChat";
 	
-	public static final String PERM_CHARLIMIT = "cu.charlimit";
+	public static final String PERM_CHARLIMIT = "cu.charlimit"; //Maybe move them to a better place
 	public static final String PERM_IGNORESPAM = "cu.ignorespam";
 	
 	@Instance
 	public static UnlimitedChat INSTANCE = new UnlimitedChat();
 	@SidedProxy(clientSide="thecrafter4000.unlimitedchat.ClientProxy", serverSide="thecrafter4000.unlimitedchat.ServerProxy")
 	public static CommonProxy Proxy;
-	public static Logger Logger = LogManager.getLogger(MODID);
+	public static Logger Logger = LogManager.getLogger(NAME);
 	public static SimpleNetworkWrapper PacketHandler = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
 	
 	@EventHandler
