@@ -60,8 +60,8 @@ public class PacketC02ClientCommand implements IMessage {
 			EntityPlayerMP sender = ctx.getServerHandler().playerEntity; // The person who wants to perform the command on client-side
 			MinecraftServer.getServer().getConfigurationManager().playerEntityList.forEach( obj -> {
 				EntityPlayerMP p = (EntityPlayerMP) obj; // All players on the server
-				if(APIRegistry.perms.checkPermission(p, CommonProxy.PERM_SEECLIENTCOMMANDS)) { // Do not notify anybody.
-					ChatComponentTranslation msg = new ChatComponentTranslation("chat.type.admin", new Object[] {"ClientCommand", new ChatComponentText("[" + sender.getDisplayName() + "] " + message.text)});
+				if(ServerProxy.canSeeClientCommands(p)) { // Do not notify everybody.
+					ChatComponentTranslation msg = new ChatComponentTranslation("chat.type.admin", new Object[] {"ClientCommand", new ChatComponentText(sender.getDisplayName() + " -> " + message.text)});
 					msg.getChatStyle().setColor(EnumChatFormatting.GRAY);
 			        msg.getChatStyle().setItalic(true);
 					p.addChatMessage(msg);

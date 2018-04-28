@@ -33,8 +33,8 @@ public class GuiUnlimitedChat extends GuiChat {
         if (ClientCommandHandler.instance.executeCommand(mc.thePlayer, msg) != 0) { // Executes client-side commands	
         	if(ChatProperties.get(Minecraft.getMinecraft().thePlayer).doesSendClientCommands()) { // Send's command to server.
         		UnlimitedChat.PacketHandler.sendToServer(new PacketC02ClientCommand(msg));
-            	return;
         	}
+        	return; // Do not send command as normal chat message
         }
         UnlimitedChat.PacketHandler.sendToServer(new PacketC01ChatMessage(msg)); // Sends the text to the server.
 	}

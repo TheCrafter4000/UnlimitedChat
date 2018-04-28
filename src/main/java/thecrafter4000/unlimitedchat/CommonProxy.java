@@ -39,20 +39,11 @@ import thecrafter4000.unlimitedchat.network.PacketC02ClientCommand.HandlerS02Cli
  */
 public class CommonProxy {
 	
-	public static final String PERM_CHARLIMIT = "cu.charlimit";
-	public static final String PERM_IGNORESPAM = "cu.ignorespam";
-	public static final String PERM_SENDCLIENTCOMMANDS = "cu.clientcommands.send";
-	public static final String PERM_SEECLIENTCOMMANDS = "cu.clientcommands.read";
-	
-	/** True if ForgeEssentials had been detected. */
-	public static boolean ForgeEssentialsSupport = false;
-	
 	public void preInit(FMLPreInitializationEvent event) {
 		// Register network stuff
 		PacketHandler.registerMessage(HandlerS01ChatMessage.class, PacketC01ChatMessage.class, 1, Side.SERVER);
 		PacketHandler.registerMessage(HandlerS02ClientCommand.class, PacketC02ClientCommand.class, 2, Side.SERVER);
 		
-		// All proxies can handle events now.
 		FMLCommonHandler.instance().bus().register(this);
 		MinecraftForge.EVENT_BUS.register(this);
 	}
@@ -60,19 +51,6 @@ public class CommonProxy {
 	public void init(FMLInitializationEvent event) {}
 	
 	public void postInit(FMLPostInitializationEvent event) {
-		if(Loader.isModLoaded("ForgeEssentials")) { // Checks for ForgeEssentials.
-			ForgeEssentialsSupport = true;
-			APIRegistry.perms.registerPermissionProperty(PERM_CHARLIMIT, "100", "The character limit a player's message cannot exceed. ~Max: 32767");
-			APIRegistry.perms.registerPermission(PERM_IGNORESPAM, PermissionLevel.OP);
-			APIRegistry.perms.registerPermission(PERM_SEECLIENTCOMMANDS, PermissionLevel.OP);
-			APIRegistry.perms.registerPermission(PERM_SENDCLIENTCOMMANDS, PermissionLevel.FALSE);
-			APIRegistry.FE_EVENTBUS.register(this);
-			UnlimitedChat.Logger.info("Detected ForgeEssentials.");
-		}else {
-			UnlimitedChat.Logger.warn("Did not detect ForgeEssentials! No permission support! Do not use as server!");
-		}
-//		
-//		//TODO: Clear
 //		ClientCommandHandler.instance.registerCommand(new ICommand() {			
 //			@Override
 //			public int compareTo(Object arg0) {
@@ -115,9 +93,6 @@ public class CommonProxy {
 //				return Lists.newArrayList();
 //			}
 //		});
-//		ClientCommandHandler.instance.getCommands().forEach( (a, b) -> {
-//			System.out.println("Name: " + a + ", class: " + b);
-//		});
 	}	
 	
 	/**
@@ -129,50 +104,10 @@ public class CommonProxy {
 			ChatProperties.register((EntityPlayer) event.entity);
 		}
 	}
-	
-	/** Server side only */
-	@SubscribeEvent
-	public void onPermissionUpdate(PermissionEvent.BeforeSave event) {
-		MinecraftServer.getServer().getConfigurationManager().playerEntityList.forEach( obj -> ChatProperties.get((EntityPlayer) obj).load());
-	}
-	
-	/** Server side only */
+		
+	/** Only called server side */
 	@SubscribeEvent
 	public void onPlayerJoinEvent(PlayerLoggedInEvent event) {
 		ChatProperties.get(event.player).load();
-	}
-	
-	/** Server side only */
-	public static int getChatLimit(EntityPlayerMP player) {
-		if(!ForgeEssentialsSupport) { // Makes sure Client's without ForgeEssentials can work in SP
-			return 32767;
-		}
-		
-		String value = APIRegistry.perms.getPermissionProperty(player, PERM_CHARLIMIT);
-		if(value != null) {
-			try {
-				return Integer.valueOf(value);
-			} catch(NumberFormatException e) { // Sadly can't fix that myself, I don't know what group is causing the error.
-				UnlimitedChat.Logger.fatal("Invalid permission value: " + value);
-				UnlimitedChat.Logger.fatal("Change it to an number instead.");
-			}
-		}
-		return 100;
-	}
-	
-	/** Server side only */
-	public static boolean getIgnoreSpam(EntityPlayerMP player) {
-		if(!ForgeEssentialsSupport) { // Makes sure Client's without ForgeEssentials can work in SP
-			return true;
-		}
-		return APIRegistry.perms.checkPermission(player, PERM_IGNORESPAM);
-	}
-	
-	/** Server side only */
-	public static boolean shouldSendClientCommands(EntityPlayerMP player) {
-		if(!ForgeEssentialsSupport) { // Makes sure Client's without ForgeEssentials can work in SP
-			return false;
-		}
-		return APIRegistry.perms.checkPermission(player, PERM_SENDCLIENTCOMMANDS);
 	}
 }
