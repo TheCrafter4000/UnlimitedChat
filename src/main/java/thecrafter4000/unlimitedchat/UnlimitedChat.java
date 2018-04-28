@@ -20,11 +20,8 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 @Mod(modid = UnlimitedChat.MODID, version = UnlimitedChat.VERSION, name = UnlimitedChat.NAME, acceptedMinecraftVersions = "1.7.10" )
 public class UnlimitedChat {
 	public static final String MODID = "unlimitedchat";
-	public static final String VERSION = "1.0.4";
+	public static final String VERSION = "1.0.5";
 	public static final String NAME = "UnlimitedChat";
-	
-	public static final String PERM_CHARLIMIT = "cu.charlimit"; //Maybe move them to a better place
-	public static final String PERM_IGNORESPAM = "cu.ignorespam";
 	
 	@Instance
 	public static UnlimitedChat INSTANCE = new UnlimitedChat();

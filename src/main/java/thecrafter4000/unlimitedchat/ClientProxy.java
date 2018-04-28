@@ -3,7 +3,6 @@ package thecrafter4000.unlimitedchat;
 import java.lang.reflect.Field;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent.ClientConnectedToServerEvent;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.GuiOpenEvent;
@@ -14,22 +13,6 @@ import thecrafter4000.unlimitedchat.client.GuiUnlimitedChat;
  * @author TheCrafter4000
  */
 public class ClientProxy extends CommonProxy {
-	
-	/** A static char limit, received form server when player joins. */
-	public static int ChatLimit = 100;
-	// I really don't like this, but I can't use IExtendedEntityProperties. 
-	// Would need to sync again after player dies/change dim if I would use it.
-	//TODO: Do it.
-	
-	
-	/**
-	 * Called when the player joins the world. Used to reset the char limit.
-	 */
-	@SubscribeEvent
-	public void onPlayerJoin(ClientConnectedToServerEvent event) {
-		ChatLimit = 100; // Resets the chatlimit.
-		UnlimitedChat.Logger.info("Reset chatlimit.");
-	}
 	
 	/**
 	 * Called when a GUI is opened. Used to replace the default chat GUI.
@@ -44,8 +27,6 @@ public class ClientProxy extends CommonProxy {
 			}
 		}
 	}
-	
-	//TODO: Add discord formatting support
 
 	/** Internal reflection method */
 	private String getText(GuiScreen gui) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {

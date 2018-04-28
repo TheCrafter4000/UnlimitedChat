@@ -81,7 +81,7 @@ public class PacketC01ChatMessage implements IMessage {
 			// Check's for forbidden characters.
 			for (int i = 0; i < text.length(); ++i) {
 				if (!ChatAllowedCharacters.isAllowedCharacter(text.charAt(i))) {
-					nhps.kickPlayerFromServer("Illegal characters in chat");
+					nhps.kickPlayerFromServer("Illegal characters in chat!");
 					return;
 				}
 			}
@@ -97,8 +97,6 @@ public class PacketC01ChatMessage implements IMessage {
 				MinecraftServer.getServer().getConfigurationManager().sendChatMsgImpl(chatcomponenttranslation1, false); // Send's the message to all clients
 			}
 
-			//TODO: Rework the whole spam filter thing. Warn players instead of kicking them, maybe prevent letter spam, or decrease they're char limit.
-			
 			if(!ServerProxy.getIgnoreSpam(nhps.playerEntity)) { // Disables spam check for op's
 				int oldChatSpamThreshold = (Integer) this.getChatSpamThreshold().get(nhps); // saves the old value. It makes sure nobody gets kicked after posting the first message.
 				this.getChatSpamThreshold().set(nhps, oldChatSpamThreshold + Math.max((text.length()/100)*40, 20)); // nhps.chatSpamThresholdCount += 20;

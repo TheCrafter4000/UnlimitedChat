@@ -32,6 +32,9 @@ version = "unknown"
 group= "thecrafter4000.unlimitedchat"
 archivesBaseName = "UnlimitedChat"
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 File file = file("src/main/java/" + project.group.replace(".", "/") + "/" + project.archivesBaseName + ".java") // Finds main modfile
 file.readLines().each{ // Iterates over the whole file
 	if (it.contains("public static final String VERSION = ")) { // looks for the VERSION field
