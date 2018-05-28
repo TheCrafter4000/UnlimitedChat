@@ -1,20 +1,21 @@
 package thecrafter4000.unlimitedchat;
 
 import com.forgeessentials.api.APIRegistry;
-import com.forgeessentials.api.permissions.PermissionEvent;
 import com.forgeessentials.api.permissions.PermissionEvent.BeforeSave;
-import com.forgeessentials.api.permissions.PermissionEvent.Group.ModifyPermission;
-
 import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
-import net.minecraft.entity.player.EntityPlayer;
+import cpw.mods.fml.common.gameevent.PlayerEvent;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.permission.PermissionLevel;
 import thecrafter4000.unlimitedchat.data.ChatProperties;
+import thecrafter4000.unlimitedchat.network.PacketS03ChatConfig;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class ServerProxy extends CommonProxy {
 
@@ -25,6 +26,9 @@ public class ServerProxy extends CommonProxy {
 	
 	/** True if ForgeEssentials had been detected. */
 	public static boolean ForgeEssentialsSupport = false;
+
+	/** Internal buffer. Reduces access to FE methods */
+	private static Map<UUID, ChatProperties> buffer = new HashMap<>();
 	
 	@Override
 	public void postInit(FMLPostInitializationEvent event) {
@@ -42,14 +46,35 @@ public class ServerProxy extends CommonProxy {
 		}
 	}
 	
-	/** Reloads chatlimit if something changed. */
+	/** Updates properties if something changed. */
 	@SubscribeEvent
-	public void onPermissionUpdate(PermissionEvent.BeforeSave event) {
-		MinecraftServer.getServer().getConfigurationManager().playerEntityList.forEach( obj -> ChatProperties.get((EntityPlayer) obj).load());
+	@Optional.Method(modid = "ForgeEssentials")
+	public void onPermissionUpdate(BeforeSave event) {
+		buffer.clear();
+		MinecraftServer.getServer().getConfigurationManager().playerEntityList.forEach( p -> updatePlayer((EntityPlayerMP) p));
 	}
-	
-	public static int getChatLimit(EntityPlayerMP player) {
-		if(!ForgeEssentialsSupport) { // Makes sure Client's without ForgeEssentials can work in SP
+
+	@SubscribeEvent
+	public void onPlayerJoinEvent(PlayerEvent.PlayerLoggedInEvent event) {
+		updatePlayer((EntityPlayerMP) event.player);
+	}
+
+	private void updatePlayer(EntityPlayerMP player){
+		UnlimitedChat.PacketHandler.sendTo(new PacketS03ChatConfig(getProperties(player)), player);
+	}
+
+	public static ChatProperties getProperties(EntityPlayerMP player){
+		UUID uuid = player.getUniqueID();
+		if(!buffer.containsKey(uuid)){
+			buffer.put(uuid, new ChatProperties(getChatLimit(player), shouldSendClientCommands(player), canSeeClientCommands(player), shouldIgnoreSpam(player)));
+		}
+		return buffer.get(uuid);
+	}
+
+	// Internal helper functions.
+
+	private static int getChatLimit(EntityPlayerMP player) {
+		if(!ForgeEssentialsSupport) {
 			return 32767;
 		}
 		
@@ -57,30 +82,32 @@ public class ServerProxy extends CommonProxy {
 		if(value != null) {
 			try {
 				return Integer.valueOf(value);
-			} catch(NumberFormatException e) { // Sadly can't fix that myself, I don't know what group is causing the error.
-				UnlimitedChat.Logger.fatal("Invalid permission value: " + value);
-				UnlimitedChat.Logger.fatal("Change it to an number instead.");
+			} catch(NumberFormatException e) {
+				UnlimitedChat.Logger.fatal("Invalid permission value " + '"' + value + '"' + " for player " + player.getDisplayName() + "!");
+				UnlimitedChat.Logger.fatal("Please fix your FE permission configuration.");
+				e.printStackTrace();
 			}
 		}
+		//Should never happen.
 		return 100;
 	}
-	
-	public static boolean getIgnoreSpam(EntityPlayerMP player) {
-		if(!ForgeEssentialsSupport) { // Makes sure Client's without ForgeEssentials can work in SP
-			return true;
+
+	private static boolean shouldIgnoreSpam(EntityPlayerMP player) {
+		if(!ForgeEssentialsSupport) {
+			return false;
 		}
 		return APIRegistry.perms.checkPermission(player, PERM_IGNORESPAM);
 	}
-	
-	public static boolean shouldSendClientCommands(EntityPlayerMP player) {
-		if(!ForgeEssentialsSupport) { // Makes sure Client's without ForgeEssentials can work in SP
+
+	private static boolean shouldSendClientCommands(EntityPlayerMP player) {
+		if(!ForgeEssentialsSupport) {
 			return false;
 		}
 		return APIRegistry.perms.checkPermission(player, PERM_SENDCLIENTCOMMANDS);
 	}
-	
-	public static boolean canSeeClientCommands(EntityPlayerMP player) {
-		if(!ForgeEssentialsSupport) { // Makes sure Client's without ForgeEssentials can work in SP
+
+	private static boolean canSeeClientCommands(EntityPlayerMP player) {
+		if(!ForgeEssentialsSupport) {
 			return true;
 		}
 

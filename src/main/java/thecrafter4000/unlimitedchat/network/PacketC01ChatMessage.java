@@ -1,8 +1,5 @@
 package thecrafter4000.unlimitedchat.network;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -18,6 +15,9 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.ForgeHooks;
 import thecrafter4000.unlimitedchat.ServerProxy;
 import thecrafter4000.unlimitedchat.UnlimitedChat;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * A packet sent form client to server containing a chat message.
@@ -59,7 +59,7 @@ public class PacketC01ChatMessage implements IMessage {
 			return null;
 		}
 		
-		public void processChatMessage(NetHandlerPlayServer nhps, String text) throws Exception {
+		private void processChatMessage(NetHandlerPlayServer nhps, String text) throws Exception {
 			
 			// Prevent chating while chat gui is not open.
 			if (nhps.playerEntity.func_147096_v() == EntityPlayer.EnumChatVisibility.HIDDEN) { 
@@ -70,8 +70,8 @@ public class PacketC01ChatMessage implements IMessage {
 			} 
 			
 			// Checks for matching char limit.
-			if(text.length() > ServerProxy.getChatLimit(nhps.playerEntity)) {
-				nhps.kickPlayerFromServer("Illegal text lenght!");
+			if(text.length() > ServerProxy.getProperties(nhps.playerEntity).charLimit) {
+				nhps.kickPlayerFromServer("Illegal text length!");
 				return;
 			}
 
@@ -97,11 +97,12 @@ public class PacketC01ChatMessage implements IMessage {
 				MinecraftServer.getServer().getConfigurationManager().sendChatMsgImpl(chatcomponenttranslation1, false); // Send's the message to all clients
 			}
 
-			if(!ServerProxy.getIgnoreSpam(nhps.playerEntity)) { // Disables spam check for op's
-				int oldChatSpamThreshold = (Integer) this.getChatSpamThreshold().get(nhps); // saves the old value. It makes sure nobody gets kicked after posting the first message.
-				this.getChatSpamThreshold().set(nhps, oldChatSpamThreshold + Math.max((text.length()/100)*40, 20)); // nhps.chatSpamThresholdCount += 20;
+			if(!ServerProxy.getProperties(nhps.playerEntity).ignoreSpamCheck) { // Disables spam check
+				Field chatSpamThreshold = getChatSpamThreshold();
+				int oldChatSpamThreshold = (Integer) chatSpamThreshold.get(nhps); // saves the old value. It makes sure nobody gets kicked after posting the first message.
+				chatSpamThreshold.set(nhps, oldChatSpamThreshold + Math.max((text.length()/100)*40, 20)); // nhps.chatSpamThresholdCount += 20;
 
-				if (((Integer) this.getChatSpamThreshold().get(nhps)) > 200 && oldChatSpamThreshold != 0) {// Kick after too many traffic, but never after the first message
+				if (((Integer) chatSpamThreshold.get(nhps)) > 200 && oldChatSpamThreshold != 0) {// Kick after too many traffic, but never after the first message
 					nhps.kickPlayerFromServer("disconnect.spam");
 				}
 			}

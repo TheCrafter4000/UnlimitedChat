@@ -1,29 +1,16 @@
 package thecrafter4000.unlimitedchat.network;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
-import com.forgeessentials.api.APIRegistry;
-
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.NetHandlerPlayServer;
-import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.common.ForgeHooks;
-import thecrafter4000.unlimitedchat.CommonProxy;
 import thecrafter4000.unlimitedchat.ServerProxy;
-import thecrafter4000.unlimitedchat.UnlimitedChat;
 
 /**
  * A packet sent form client to server if he performs an client command
@@ -65,7 +52,7 @@ public class PacketC02ClientCommand implements IMessage {
 
 			MinecraftServer.getServer().getConfigurationManager().playerEntityList.forEach( obj -> {  // All players on the server
 				EntityPlayerMP p = (EntityPlayerMP) obj;
-				if(ServerProxy.canSeeClientCommands(p)) { 
+				if(ServerProxy.getProperties(p).canSeeClientCommands) {
 					p.addChatMessage(msg);
 				}
 			});

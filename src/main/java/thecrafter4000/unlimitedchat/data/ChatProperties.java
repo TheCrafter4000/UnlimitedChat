@@ -1,81 +1,39 @@
 package thecrafter4000.unlimitedchat.data;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
-import net.minecraftforge.common.IExtendedEntityProperties;
-import thecrafter4000.unlimitedchat.ServerProxy;
-
 /**
- * {@link IExtendedEntityProperties} implementation holding all important client data. 
- * Any data in this class can be modified by clients - do NOT trust anything in this on server.
- * If you HAVE to access stored data, make sure to reload it beforehand, or access it directly. 
- * @author TheCrafter4000
+ * An internal storage class for chat data; Used {@link net.minecraftforge.common.IExtendedEntityProperties} in the past, but it won't match the requirement that this mod shouldn't do anything if only on client-side.
  */
-public class ChatProperties implements IExtendedEntityProperties {
+public class ChatProperties {
+	public int charLimit;
+	public boolean sendClientCommands;
 
-	public static final String EXT_PROP_NAME = "ChatProperties";
-	private static final int ID_CHARLIMIT = 20;
-	private static final int ID_COMMANDS = 21;
-	
-	/** Player instance */
-	private final EntityPlayer player;
-	
-	public ChatProperties(EntityPlayer player) {
-		this.player = player;
-		
-		this.player.getDataWatcher().addObject(ID_CHARLIMIT, 100);
-		this.player.getDataWatcher().addObject(ID_COMMANDS, 0); // Boolean
-	}
-	
-	/**
-	 * Load's stored data on server. 
-	 */
-	public void load() {
-		this.setCharlimit(ServerProxy.getChatLimit((EntityPlayerMP) player));
-		this.setSendClientCommands(ServerProxy.shouldSendClientCommands((EntityPlayerMP) player));
-	}
-	
-	// Helper functions
-	
-	public static void register(EntityPlayer player) {
-		player.registerExtendedProperties(EXT_PROP_NAME, new ChatProperties(player));
-	}
-	
-	public static final ChatProperties get(EntityPlayer player) {
-		return (ChatProperties) player.getExtendedProperties(EXT_PROP_NAME);
-	}
-	
-	// Getter/Setter
-	
-	public int getCharlimit() {
-		return this.player.getDataWatcher().getWatchableObjectInt(ID_CHARLIMIT);
+	/** Client side only */
+	public boolean modEnabled;
+
+	/** Server side only */
+	public boolean canSeeClientCommands;
+	/** Server side only */
+	public boolean ignoreSpamCheck;
+
+	/** Client side only. Used when the mod is not on the server. */
+	public ChatProperties() {
+		this.charLimit = 100;
+		this.sendClientCommands = false;
+		this.modEnabled = false;
 	}
 
-	public void setCharlimit(int charlimit) {
-		this.player.getDataWatcher().updateObject(ID_CHARLIMIT, charlimit);
+	/** Client side only. Uses when chat configuration is received*/
+	public ChatProperties(int charLimit, boolean sendClientCommands) {
+		this.charLimit = charLimit;
+		this.sendClientCommands = sendClientCommands;
+		this.modEnabled = true;
 	}
 
-	public boolean doesSendClientCommands() {
-		return this.player.getDataWatcher().getWatchableObjectInt(ID_COMMANDS) == 1;
+	/** Server side only */
+	public ChatProperties(int charLimit, boolean sendClientCommands, boolean canSeeClientCommands, boolean ignoreSpamCheck) {
+		this.charLimit = charLimit;
+		this.sendClientCommands = sendClientCommands;
+		this.canSeeClientCommands = canSeeClientCommands;
+		this.ignoreSpamCheck = ignoreSpamCheck;
 	}
-
-	public void setSendClientCommands(boolean sendClientCommands) {
-		this.player.getDataWatcher().updateObject(ID_COMMANDS, sendClientCommands ? 1 : 0);
-	}
-
-	// We don't want to save our client data. 
-	
-	@Override
-	public void saveNBTData(NBTTagCompound compound) {}
-
-	@Override
-	public void loadNBTData(NBTTagCompound compound) {}
-
-	@Override
-	public void init(Entity entity, World world) {}
 }
